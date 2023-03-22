@@ -120,7 +120,7 @@ impl EguiManager {
         self.state.on_event(&self.ctx, event)
     }
 
-    /// Render the Egui gui built in `run_ui` to the `output` texture.
+    /// Render the `run_ui` to the `output` texture using Egui.
     pub fn render<'rp>(
         &'rp mut self,
         wgpu_state: &mut WgpuState,

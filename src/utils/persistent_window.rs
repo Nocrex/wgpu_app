@@ -30,6 +30,9 @@ impl<S> PersistentWindow<S> {
     /// Egui render function.
     /// Returns false when the window is ready to close, will continue being rendered as long as
     /// true is returned.
+    ///
+    /// `new_windows` will be added to the list of persistent windows in the manager at the end of
+    /// the frame, to allow persistent windows to spawn more persistent windows.
     pub fn render(
         &mut self,
         new_windows: &mut Vec<PersistentWindow<S>>,
