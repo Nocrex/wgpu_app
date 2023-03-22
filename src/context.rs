@@ -2,33 +2,55 @@ use egui_wgpu::renderer::ScreenDescriptor;
 use egui_winit::{native_pixels_per_point, screen_size_in_pixels, EventResponse};
 use wgpu::SurfaceTexture;
 use winit::{
+    dpi::PhysicalSize,
     event::{Event, WindowEvent},
     event_loop::EventLoopWindowTarget,
+    window::Window,
 };
 
-use crate::{
-    io::{keyboard::Keyboard, mouse::Mouse},
-    WgpuState,
-};
+use crate::io::{keyboard::Keyboard, mouse::Mouse};
 
+/// `Context` stores some useful things you might want to use in your app, including input from a Keyboard and Mouse,
+/// everything you need to render using Wgpu and an EguiManager for all your gui needs!
 pub struct Context {
     pub wgpu_state: WgpuState,
     pub egui: EguiManager,
 
     pub mouse: Mouse,
     pub keyboard: Keyboard,
+    /// If true, Egui will not process new window events
     pub block_gui_input: bool,
+    /// If true, Egui will not receive keyboard inputs for the tab key.
     pub block_gui_tab_input: bool,
 }
 
+/// Convenience struct to manage the required state to use Egui
 pub struct EguiManager {
-    pub renderer: egui_wgpu::Renderer,
-    pub state: egui_winit::State,
+    renderer: egui_wgpu::Renderer,
+    state: egui_winit::State,
     pub ctx: egui::Context,
 }
 
-/// `Context` stores some useful things you might want to use in your app, including input from a Keyboard and Mouse,
-/// the Display to render to and an instead of EguiGlium for all your gui needs!
+/// Convenience struct holding everything you need to get rendering with Wgpu
+pub struct WgpuState {
+    pub surface: wgpu::Surface,
+    pub device: wgpu::Device,
+    pub queue: wgpu::Queue,
+    pub config: wgpu::SurfaceConfiguration,
+    pub size: winit::dpi::PhysicalSize<u32>,
+    pub window: Window,
+}
+
+impl WgpuState {
+    /// Reconfigure the Wgpu surface for the given size
+    pub fn resize(&mut self, size: PhysicalSize<u32>) {
+        self.config.width = size.width;
+        self.config.height = size.height;
+        self.surface.configure(&self.device, &self.config);
+        self.size = size;
+    }
+}
+
 impl Context {
     pub fn new(wgpu_state: WgpuState, egui: EguiManager) -> Context {
         Context {

@@ -1,4 +1,6 @@
-use egui_winit::winit::event::{Event, WindowEvent, DeviceEvent, MouseButton, ElementState, MouseScrollDelta};
+use egui_winit::winit::event::{
+    DeviceEvent, ElementState, Event, MouseButton, MouseScrollDelta, WindowEvent,
+};
 
 pub struct Mouse {
     this_frame: [bool; 10],
@@ -33,7 +35,7 @@ impl Mouse {
         self.pressed[button] = false;
     }
 
-    pub fn translate(&mut self, delta: (f64, f64)) {
+    fn translate(&mut self, delta: (f64, f64)) {
         self.delta.0 += delta.0;
         self.delta.1 += delta.1;
     }
@@ -56,72 +58,76 @@ impl Mouse {
     /// This function is called automatically in the application loop, you shouldn't be calling this yourself.
     pub fn handle_event(&mut self, event: &Event<()>) {
         match event {
-            Event::WindowEvent {window_id: _, event} => {
-                match event {
-                    WindowEvent::CursorMoved {
-                        device_id: _,
-                        position,
-                        ..
-                    } => {
-                        self.update_pos((position.x as i32, position.y as i32));
-                    }
-                    WindowEvent::MouseInput {
-                        device_id: _,
-                        state,
-                        button,
-                        ..
-                    } => {
-                        let mbutton: u16;
-                        match button {
-                            MouseButton::Left => {
-                                mbutton = 0;
-                            }
-                            MouseButton::Middle => {
-                                mbutton = 1;
-                            }
-                            MouseButton::Right => {
-                                mbutton = 2;
-                            }
-                            MouseButton::Other(bnum) => {
-                                if bnum > &(9 as u16) {
-                                    return;
-                                }
-                                mbutton = *bnum;
-                            }
-                        }
-                        let mut pressed = false;
-                        if state == &ElementState::Pressed {
-                            pressed = true;
-                        }
-                        if pressed {
-                            self.press_button(mbutton as usize);
-                        } else {
-                            self.release_button(mbutton as usize);
-                        }
-                    }
-                    WindowEvent::MouseWheel {
-                        device_id: _, delta, ..
-                    } => match delta {
-                        MouseScrollDelta::LineDelta(y, x) => {
-                            self.scroll((*x, *y));
-                        }
-                        _ => {}
-                    },
-                    WindowEvent::Focused(focused) => {
-                        self.focused = *focused;
-                    },
-                    _ => {}
+            Event::WindowEvent {
+                window_id: _,
+                event,
+            } => match event {
+                WindowEvent::CursorMoved {
+                    device_id: _,
+                    position,
+                    ..
+                } => {
+                    self.update_pos((position.x as i32, position.y as i32));
                 }
+                WindowEvent::MouseInput {
+                    device_id: _,
+                    state,
+                    button,
+                    ..
+                } => {
+                    let mbutton: u16;
+                    match button {
+                        MouseButton::Left => {
+                            mbutton = 0;
+                        }
+                        MouseButton::Middle => {
+                            mbutton = 1;
+                        }
+                        MouseButton::Right => {
+                            mbutton = 2;
+                        }
+                        MouseButton::Other(bnum) => {
+                            if bnum > &(9 as u16) {
+                                return;
+                            }
+                            mbutton = *bnum;
+                        }
+                    }
+                    let mut pressed = false;
+                    if state == &ElementState::Pressed {
+                        pressed = true;
+                    }
+                    if pressed {
+                        self.press_button(mbutton as usize);
+                    } else {
+                        self.release_button(mbutton as usize);
+                    }
+                }
+                WindowEvent::MouseWheel {
+                    device_id: _,
+                    delta,
+                    ..
+                } => match delta {
+                    MouseScrollDelta::LineDelta(y, x) => {
+                        self.scroll((*x, *y));
+                    }
+                    _ => {}
+                },
+                WindowEvent::Focused(focused) => {
+                    self.focused = *focused;
+                }
+                _ => {}
             },
-            Event::DeviceEvent {device_id: _, event} => {
-                match event {
-                    DeviceEvent::MouseMotion{ delta} => {
-                        if self.focused {
-                            self.translate(*delta);
-                        }
-                    },
-                    _ => {}
+            Event::DeviceEvent {
+                device_id: _,
+                event,
+            } => match event {
+                DeviceEvent::MouseMotion { delta } => {
+                    if self.focused {
+                        self.translate(*delta);
+                    }
                 }
+                _ => {}
             },
             _ => {}
         }
@@ -133,7 +139,6 @@ impl Mouse {
         self.wheel = (0.0, 0.0);
         self.this_frame = [false; 10];
     }
-
 
     /// Get a tuple containing the x and y position of the mouse inside the window
     pub fn get_pos(&self) -> (i32, i32) {

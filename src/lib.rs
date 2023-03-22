@@ -1,4 +1,4 @@
-use context::{Context, EguiManager};
+use context::{Context, EguiManager, WgpuState};
 
 pub mod context;
 pub mod io;
@@ -12,28 +12,9 @@ use egui_winit::winit::{
 pub use timer::Timer;
 
 use winit::{
-    dpi::PhysicalSize,
     event::{self, Event},
-    window::{Window, WindowBuilder},
+    window::WindowBuilder,
 };
-
-pub struct WgpuState {
-    pub surface: wgpu::Surface,
-    pub device: wgpu::Device,
-    pub queue: wgpu::Queue,
-    pub config: wgpu::SurfaceConfiguration,
-    pub size: winit::dpi::PhysicalSize<u32>,
-    pub window: Window,
-}
-
-impl WgpuState {
-    pub fn resize(&mut self, size: PhysicalSize<u32>) {
-        self.config.width = size.width;
-        self.config.height = size.height;
-        self.surface.configure(&self.device, &self.config);
-        self.size = size;
-    }
-}
 
 /// Implement this trait to run it with `run` or `run_with_context`!
 pub trait Application {
@@ -47,11 +28,11 @@ pub trait Application {
     fn handle_event(&mut self, ctx: &mut Context, event: &Event<()>);
 }
 
-/// Create and run a glium window for this application
+/// Create and run a window for this application
 ///
 /// # Arguments
 ///
-/// * `mut app: Application` - the application you want to run with glium
+/// * `mut app: Application` - the application you want to run with winit and Wgpu
 /// * `wb: WindowBuilder` - Settings on how the window should be shaped/sized/positioned/resizable etc
 pub fn run<A: 'static + Application>(app: A, wb: WindowBuilder) {
     let event_loop = winit::event_loop::EventLoopBuilder::<()>::with_user_event().build();
@@ -120,12 +101,12 @@ pub fn run<A: 'static + Application>(app: A, wb: WindowBuilder) {
     run_with_context(app, ctx, event_loop);
 }
 
-/// Run a glium_app Application with a provided Context and EventLoop (usually obtained from `create`)
+/// Run a wgpu_app `Application` with a provided Context and EventLoop (usually obtained from `create`)
 ///
 /// # Arguments
 ///
-/// * `mut app: Application` - the application you want to run with glium
-/// * `mut context: Context` - A glium_app Context containing a Display, Egui object and io managers
+/// * `mut app: Application` - the application you want to run
+/// * `mut context: Context` - A wgpu_app Context containing a Display, Egui object and io managers
 /// * `event_loop: EventLoop<()>` - The EventLoop for the window
 pub fn run_with_context<A: 'static + Application>(
     mut app: A,

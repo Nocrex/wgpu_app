@@ -1,4 +1,4 @@
-use std::{time::Instant};
+use std::time::Instant;
 
 pub struct Timer {
     last: Instant,
@@ -34,9 +34,9 @@ impl Timer {
         self.abs_time = 0.0;
     }
 
-    /// Returns the time since `go()` last returned a value
-    /// If less than `frame_min_duration` has elapsed since this function last returned a value then it will return None, 
-    /// indicating it is not yet time for the next tick. Otherwise it will return `Some` containing how much time has elapsed in seconds 
+    /// Returns the time since `go()` last returned a value.
+    /// If less than `frame_min_duration` has elapsed since this function last returned a value then it will return None,
+    /// indicating it is not yet time for the next tick. Otherwise it will return `Some` containing how much time has elapsed in seconds
     pub fn go(&mut self) -> Option<f32> {
         let now = self.last.elapsed();
         let delta = (now.as_micros() as f32) / 1_000_000.0;
@@ -65,7 +65,7 @@ impl Timer {
         self.tick_duration = dur;
     }
 
-    /// Set how often the fps count should be updated, shorter durations update the fps count more often, but slower durations are generally more consistent and accurate
+    /// Set how often the fps count should be updated, shorter durations update the fps count more often but may be less accurate
     pub fn set_fps_update_time(&mut self, dur: f32) {
         self.fps_update_time = dur;
     }
@@ -75,7 +75,7 @@ impl Timer {
         self.fps
     }
 
-    /// How much time has passed between ticks (same as the value from calling `go` and is only updated whenever `go` succeeds).
+    /// How much time has passed between ticks (updated by calling `go`)
     pub fn delta(&self) -> f32 {
         self.last_delta
     }
