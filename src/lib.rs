@@ -1,4 +1,4 @@
-use context::Context;
+use context::{Context, EguiManager};
 
 pub mod context;
 pub mod io;
@@ -113,7 +113,9 @@ pub fn run<A: 'static + Application>(app: A, wb: WindowBuilder) {
         window,
     };
 
-    let ctx = Context::new(wgpu_state);
+    let egui = EguiManager::new(&wgpu_state.device, &event_loop);
+
+    let ctx = Context::new(wgpu_state, egui);
 
     run_with_context(app, ctx, event_loop);
 }
@@ -172,10 +174,10 @@ pub fn run_with_context<A: 'static + Application>(
                         } = event
                         {
                         } else {
-                            // context.gui.on_event(event);
+                            let _ = context.egui.on_event(event);
                         }
                     } else {
-                        // context.gui.on_event(event);
+                        let _ = context.egui.on_event(event);
                     }
                 }
                 context.handle_event(&ev);
