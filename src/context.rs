@@ -72,6 +72,34 @@ impl Context {
                 self.mouse.handle_event(event);
             }
         }
+
+        if let winit::event::Event::WindowEvent {
+            window_id: _,
+            event,
+        } = event
+        {
+            if let winit::event::WindowEvent::Resized(new_size) = event {
+                self.wgpu_state.resize(new_size.clone());
+                let _ = self.egui.on_event(event);
+            } else if !self.block_gui_input {
+                if self.block_gui_tab_input {
+                    if let winit::event::WindowEvent::KeyboardInput {
+                        input:
+                            winit::event::KeyboardInput {
+                                virtual_keycode: Some(winit::event::VirtualKeyCode::Tab),
+                                ..
+                            },
+                        ..
+                    } = event
+                    {
+                    } else {
+                        let _ = self.egui.on_event(event);
+                    }
+                } else {
+                    let _ = self.egui.on_event(event);
+                }
+            }
+        }
     }
 
     // pub fn get_screen_descriptor(&self) -> ScreenDescriptor {
@@ -130,10 +158,9 @@ impl EguiManager {
         let run_output = self
             .ctx
             .run(self.state.take_egui_input(&wgpu_state.window), run_ui);
-        let screen_size = screen_size_in_pixels(&wgpu_state.window);
         let screen_descriptor = ScreenDescriptor {
-            size_in_pixels: [screen_size.x as u32, screen_size.y as u32],
-            pixels_per_point: native_pixels_per_point(&wgpu_state.window),
+            size_in_pixels: [wgpu_state.config.width, wgpu_state.config.height],
+            pixels_per_point: wgpu_state.window.scale_factor() as f32,
         };
 
         let view = output

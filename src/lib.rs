@@ -137,33 +137,6 @@ pub fn run_with_context<A: 'static + Application>(
                 app.close(&context);
                 *control_flow = ControlFlow::Exit;
             }
-            Event::WindowEvent {
-                window_id: _,
-                event,
-            } => {
-                if let winit::event::WindowEvent::Resized(new_size) = event {
-                    context.wgpu_state.resize(new_size.clone());
-                } else if !context.block_gui_input {
-                    if context.block_gui_tab_input {
-                        if let event::WindowEvent::KeyboardInput {
-                            input:
-                                KeyboardInput {
-                                    virtual_keycode: Some(VirtualKeyCode::Tab),
-                                    ..
-                                },
-                            ..
-                        } = event
-                        {
-                        } else {
-                            let _ = context.egui.on_event(event);
-                        }
-                    } else {
-                        let _ = context.egui.on_event(event);
-                    }
-                }
-                context.handle_event(&ev);
-                app.handle_event(&mut context, &ev);
-            }
             _ => {
                 context.handle_event(&ev);
                 app.handle_event(&mut context, &ev);
