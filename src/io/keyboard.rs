@@ -28,36 +28,27 @@ impl Keyboard {
 
     /// This function is called automatically in the application loop, you shouldn't be calling this yourself.
     pub fn handle_event(&mut self, event: &Event<()>) {
-        match event {
-            Event::WindowEvent {
-                window_id: _,
-                event,
-            } => match event {
+        if let Event::WindowEvent {
+            window_id: _,
+            event:
                 WindowEvent::KeyboardInput {
                     device_id: _,
-                    input,
+                    input:
+                        KeyboardInput {
+                            scancode: _,
+                            state,
+                            virtual_keycode: Some(key),
+                            modifiers,
+                        },
                     is_synthetic: _,
-                    ..
-                } => match input {
-                    KeyboardInput {
-                        scancode: _,
-                        state,
-                        virtual_keycode,
-                        ..
-                    } => match virtual_keycode {
-                        None => {}
-                        Some(key) => {
-                            if state == &ElementState::Pressed {
-                                self.press(*key);
-                            } else {
-                                self.release(*key);
-                            }
-                        }
-                    },
                 },
-                _ => {}
-            },
-            _ => {}
+        } = event
+        {
+            if state == &ElementState::Pressed {
+                self.press(*key);
+            } else {
+                self.release(*key);
+            }
         }
     }
 

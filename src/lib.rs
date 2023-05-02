@@ -5,10 +5,7 @@ pub mod io;
 pub mod timer;
 pub mod utils;
 
-use egui_winit::winit::{
-    event::{KeyboardInput, VirtualKeyCode},
-    event_loop::{ControlFlow, EventLoop},
-};
+use egui_winit::winit::event_loop::{ControlFlow, EventLoop};
 pub use timer::Timer;
 
 use winit::{
@@ -71,8 +68,7 @@ pub fn run<A: 'static + Application>(app: A, wb: WindowBuilder) {
         .formats
         .iter()
         .copied()
-        .filter(|f| f.describe().srgb)
-        .next()
+        .find(|f| f.describe().srgb)
         .unwrap_or(surface_caps.formats[0]);
     let config = wgpu::SurfaceConfiguration {
         usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
@@ -124,12 +120,11 @@ pub fn run_with_context<A: 'static + Application>(
             Event::MainEventsCleared => {
                 events_cleared = true;
             }
-            Event::NewEvents(cause) => match cause {
-                event::StartCause::Init => {
+            Event::NewEvents(cause) => {
+                if let event::StartCause::Init = cause {
                     app.init(&mut context);
                 }
-                _ => {}
-            },
+            }
             Event::WindowEvent {
                 window_id: _,
                 event: event::WindowEvent::CloseRequested,

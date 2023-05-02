@@ -1,5 +1,5 @@
 use egui_wgpu::renderer::ScreenDescriptor;
-use egui_winit::{native_pixels_per_point, screen_size_in_pixels, EventResponse};
+use egui_winit::EventResponse;
 use wgpu::SurfaceTexture;
 use winit::{
     dpi::PhysicalSize,
@@ -66,12 +66,8 @@ impl Context {
 
     /// This function is automatically called in the application loop, you shouldn't need to call it yourself
     pub fn handle_event(&mut self, event: &Event<()>) {
-        match event {
-            _ => {
-                self.keyboard.handle_event(event);
-                self.mouse.handle_event(event);
-            }
-        }
+        self.keyboard.handle_event(event);
+        self.mouse.handle_event(event);
 
         if let winit::event::Event::WindowEvent {
             window_id: _,
@@ -79,7 +75,7 @@ impl Context {
         } = event
         {
             if let winit::event::WindowEvent::Resized(new_size) = event {
-                self.wgpu_state.resize(new_size.clone());
+                self.wgpu_state.resize(*new_size);
                 let _ = self.egui.on_event(event);
             } else if !self.block_gui_input {
                 if self.block_gui_tab_input {
@@ -149,8 +145,8 @@ impl EguiManager {
     }
 
     /// Render the `run_ui` to the `output` texture using Egui.
-    pub fn render<'rp>(
-        &'rp mut self,
+    pub fn render(
+        &mut self,
         wgpu_state: &mut WgpuState,
         output: &SurfaceTexture,
         run_ui: impl FnOnce(&egui::Context),
