@@ -87,7 +87,7 @@ impl Mouse {
                             mbutton = 2;
                         }
                         MouseButton::Other(bnum) => {
-                            if bnum > &(9 as u16) {
+                            if bnum > &9_u16 {
                                 return;
                             }
                             mbutton = *bnum;

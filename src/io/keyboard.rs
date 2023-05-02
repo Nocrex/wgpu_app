@@ -38,7 +38,7 @@ impl Keyboard {
                             scancode: _,
                             state,
                             virtual_keycode: Some(key),
-                            modifiers,
+                            modifiers: _,
                         },
                     is_synthetic: _,
                 },
@@ -54,9 +54,9 @@ impl Keyboard {
 
     /// Returns if this key was pressed down on this frame
     pub fn pressed_this_frame(&self, key: &VirtualKeyCode) -> bool {
-        match self.keys.get(&key) {
+        match self.keys.get(key) {
             None | Some(false) => false,
-            Some(true) => match self.this_frame.get(&key) {
+            Some(true) => match self.this_frame.get(key) {
                 None | Some(false) => false,
                 Some(true) => true,
             },
@@ -65,9 +65,9 @@ impl Keyboard {
 
     /// Returns if this key was released on this frame
     pub fn released_this_frame(&self, key: &VirtualKeyCode) -> bool {
-        match self.keys.get(&key) {
+        match self.keys.get(key) {
             Some(true) => false,
-            None | Some(false) => match self.this_frame.get(&key) {
+            None | Some(false) => match self.this_frame.get(key) {
                 None | Some(false) => false,
                 Some(true) => true,
             },
@@ -76,7 +76,7 @@ impl Keyboard {
 
     /// Returns if the key is currently held down
     pub fn is_pressed(&self, key: &VirtualKeyCode) -> bool {
-        match self.keys.get(&key) {
+        match self.keys.get(key) {
             None | Some(false) => false,
             Some(true) => true,
         }
