@@ -75,24 +75,17 @@ impl Mouse {
                     button,
                     ..
                 } => {
-                    let mbutton: u16;
-                    match button {
-                        MouseButton::Left => {
-                            mbutton = 0;
-                        }
-                        MouseButton::Middle => {
-                            mbutton = 1;
-                        }
-                        MouseButton::Right => {
-                            mbutton = 2;
-                        }
+                    let mbutton: u16 = match button {
+                        MouseButton::Left => 0,
+                        MouseButton::Middle => 1,
+                        MouseButton::Right => 2,
                         MouseButton::Other(bnum) => {
                             if bnum > &9_u16 {
                                 return;
                             }
-                            mbutton = *bnum;
+                            *bnum
                         }
-                    }
+                    };
                     let mut pressed = false;
                     if state == &ElementState::Pressed {
                         pressed = true;
@@ -105,14 +98,11 @@ impl Mouse {
                 }
                 WindowEvent::MouseWheel {
                     device_id: _,
-                    delta,
+                    delta: MouseScrollDelta::LineDelta(x, y),
                     ..
-                } => match delta {
-                    MouseScrollDelta::LineDelta(y, x) => {
-                        self.scroll((*x, *y));
-                    }
-                    _ => {}
-                },
+                } => {
+                    self.scroll((*x, *y));
+                }
                 WindowEvent::Focused(focused) => {
                     self.focused = *focused;
                 }
@@ -120,15 +110,12 @@ impl Mouse {
             },
             Event::DeviceEvent {
                 device_id: _,
-                event,
-            } => match event {
-                DeviceEvent::MouseMotion { delta } => {
-                    if self.focused {
-                        self.translate(*delta);
-                    }
+                event: DeviceEvent::MouseMotion { delta },
+            } => {
+                if self.focused {
+                    self.translate(*delta);
                 }
-                _ => {}
-            },
+            }
             _ => {}
         }
     }

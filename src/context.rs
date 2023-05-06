@@ -154,6 +154,11 @@ impl EguiManager {
         let run_output = self
             .ctx
             .run(self.state.take_egui_input(&wgpu_state.window), run_ui);
+        self.state.handle_platform_output(
+            &wgpu_state.window,
+            &self.ctx,
+            run_output.platform_output,
+        );
         let screen_descriptor = ScreenDescriptor {
             size_in_pixels: [wgpu_state.config.width, wgpu_state.config.height],
             pixels_per_point: wgpu_state.window.scale_factor() as f32,
