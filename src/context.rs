@@ -1,6 +1,6 @@
 use egui_wgpu::renderer::ScreenDescriptor;
 use egui_winit::EventResponse;
-use wgpu::SurfaceTexture;
+use wgpu::{SurfaceTexture, TextureFormat};
 use winit::{
     dpi::PhysicalSize,
     event::{Event, WindowEvent},
@@ -126,14 +126,13 @@ impl Context {
 
 impl EguiManager {
     /// Setup everything required to render Egui
-    pub fn new<T>(device: &wgpu::Device, event_loop: &EventLoopWindowTarget<T>) -> EguiManager {
+    pub fn new<T>(
+        device: &wgpu::Device,
+        texture_format: TextureFormat,
+        event_loop: &EventLoopWindowTarget<T>,
+    ) -> EguiManager {
         EguiManager {
-            renderer: egui_wgpu::Renderer::new(
-                device,
-                wgpu::TextureFormat::Bgra8UnormSrgb,
-                None,
-                1,
-            ),
+            renderer: egui_wgpu::Renderer::new(device, texture_format, None, 1),
             state: egui_winit::State::new(event_loop),
             ctx: egui::Context::default(),
         }

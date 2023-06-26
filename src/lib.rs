@@ -106,7 +106,7 @@ pub fn run<A: 'static + Application>(app: A, wb: WindowBuilder) {
         window,
     };
 
-    let egui = EguiManager::new(&wgpu_state.device, &event_loop);
+    let egui = EguiManager::new(&wgpu_state.device, surface_format, &event_loop);
 
     let ctx = Context::new(wgpu_state, egui);
 
