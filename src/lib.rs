@@ -8,6 +8,7 @@ pub mod utils;
 use egui_winit::winit::event_loop::{ControlFlow, EventLoop};
 pub use timer::Timer;
 
+use wgpu::{Adapter, Surface};
 use winit::{
     event::{self, Event},
     window::WindowBuilder,
@@ -35,18 +36,33 @@ pub fn run<A: 'static + Application>(app: A, wb: WindowBuilder) {
     let event_loop = winit::event_loop::EventLoopBuilder::<()>::with_user_event().build();
     let window = wb.build(&event_loop).unwrap();
 
-    let instance = wgpu::Instance::new(wgpu::InstanceDescriptor {
-        backends: wgpu::Backends::PRIMARY,
-        dx12_shader_compiler: Default::default(),
-    });
-    let surface = unsafe { instance.create_surface(&window) }.unwrap();
+    let mut adapter_option: Option<Adapter> = None;
+    let mut surface_option: Option<Surface> = None;
+    for backend in [wgpu::Backends::PRIMARY, wgpu::Backends::SECONDARY] {
+        let instance = wgpu::Instance::new(wgpu::InstanceDescriptor {
+            backends: wgpu::Backends::all(),
+            dx12_shader_compiler: Default::default(),
+        });
+        surface_option = unsafe { instance.create_surface(&window) }.ok();
+        if surface_option.is_none() {
+            log::debug!("Couldn't create surface, moving on");
+            continue;
+        }
 
-    let adapter = pollster::block_on(instance.request_adapter(&wgpu::RequestAdapterOptions {
-        power_preference: wgpu::PowerPreference::HighPerformance,
-        compatible_surface: Some(&surface),
-        force_fallback_adapter: false,
-    }))
-    .unwrap();
+        adapter_option =
+            pollster::block_on(instance.request_adapter(&wgpu::RequestAdapterOptions {
+                power_preference: wgpu::PowerPreference::HighPerformance,
+                compatible_surface: Some(surface_option.as_ref().unwrap()),
+                force_fallback_adapter: false,
+            }));
+        if adapter_option.is_some() {
+            log::debug!("Chose backend: {:?}", backend);
+            break;
+        }
+    }
+
+    let adapter = adapter_option.expect("Failed to find suitable backend");
+    let surface = surface_option.expect("Couldn't create a suitable surface");
 
     let (device, queue) = pollster::block_on(adapter.request_device(
         &wgpu::DeviceDescriptor {
